@@ -23,6 +23,9 @@ func GetMyLocation(city string) (*GeoData, error) {
 		return nil, err
 	}
 	if res.StatusCode != 200 {
+		if res.StatusCode == 429 {
+			return nil, errors.New("request failed: too many requests")
+		}
 		return nil, errors.New("request failed: status code is not 200")
 	}
 	

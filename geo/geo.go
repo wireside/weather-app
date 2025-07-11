@@ -7,18 +7,24 @@ import (
 	"fmt"
 	"io"
 	"net/http"
+	"strings"
 )
 
 type GeoData struct {
 	City string `json:"city"`
 }
 
-type CountriesPopulationResponse struct {
-	error bool `json:"error"`
+type CityPopulationResponse struct {
+	Error bool `json:"error"`
 }
 
 func GetMyLocation(city string) (*GeoData, error) {
 	if city != "" {
+		isCity := CheckCity(city)
+		if !isCity {
+			return nil, errors.New(fmt.Sprintf("city %s doesn't exist", city))
+		}
+		
 		return &GeoData{
 			City: city,
 		}, nil
@@ -28,6 +34,9 @@ func GetMyLocation(city string) (*GeoData, error) {
 	if err != nil {
 		return nil, err
 	}
+	
+	defer res.Body.Close()
+	
 	if res.StatusCode != 200 {
 		if res.StatusCode == 429 {
 			return nil, errors.New("request failed: too many requests")
@@ -52,7 +61,7 @@ func GetMyLocation(city string) (*GeoData, error) {
 func CheckCity(city string) bool {
 	postBody, _ := json.Marshal(
 		map[string]string{
-			"city": city,
+			"city": strings.ToLower(city),
 		},
 	)
 	res, err := http.Post(
@@ -72,6 +81,10 @@ func CheckCity(city string) bool {
 			fmt.Println(errors.New("request failed: too many requests"))
 			return false
 		}
+		if res.StatusCode == 404 {
+			fmt.Println(errors.New("request failed: city data not found"))
+			return false
+		}
 		fmt.Println(errors.New("request failed: status code is not 200"))
 		return false
 	}
@@ -82,12 +95,12 @@ func CheckCity(city string) bool {
 		return false
 	}
 	
-	var countriesPopulationResponse CountriesPopulationResponse
-	err = json.Unmarshal(body, countriesPopulationResponse)
+	var cityPopulationResponse CityPopulationResponse
+	err = json.Unmarshal(body, &cityPopulationResponse)
 	if err != nil {
 		fmt.Println(err.Error())
 		return false
 	}
 	
-	return !countriesPopulationResponse.error
+	return !cityPopulationResponse.Error
 }

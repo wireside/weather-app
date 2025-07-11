@@ -10,7 +10,7 @@ import (
 
 func main() {
 	city := flag.String("city", "", "Город пользователя")
-	format := flag.Int("format", 1, "Формат вывода погоды")
+	format := flag.Int("format", 4, "Формат вывода погоды")
 	flag.Parse()
 
 	geoData, err := geo.GetMyLocation(*city)

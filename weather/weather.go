@@ -27,7 +27,7 @@ func GetWeather(geoData geo.GeoData, format int) string {
 		return ""
 	}
 	
-	res.Body.Close()
+	defer res.Body.Close()
 	
 	if res.StatusCode != 200 {
 		fmt.Println(errors.New("request failed: status code is not 200"))

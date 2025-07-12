@@ -24,37 +24,37 @@ func GetMyLocation(city string) (*GeoData, error) {
 		if !isCity {
 			return nil, errors.New(fmt.Sprintf("city %s doesn't exist", city))
 		}
-		
+
 		return &GeoData{
 			City: city,
 		}, nil
 	}
-	
+
 	res, err := http.Get("http://ip-api.com/json/")
 	if err != nil {
 		return nil, err
 	}
-	
+
 	defer res.Body.Close()
-	
+
 	if res.StatusCode != 200 {
 		if res.StatusCode == 429 {
 			return nil, errors.New("request failed: too many requests")
 		}
 		return nil, errors.New("request failed: status code is not 200")
 	}
-	
+
 	body, err := io.ReadAll(res.Body)
 	if err != nil {
 		return nil, err
 	}
-	
+
 	var geoData GeoData
 	err = json.Unmarshal(body, &geoData)
 	if err != nil {
 		return nil, err
 	}
-	
+
 	return &geoData, nil
 }
 
@@ -73,9 +73,9 @@ func CheckCity(city string) bool {
 		fmt.Println(err.Error())
 		return false
 	}
-	
+
 	defer res.Body.Close()
-	
+
 	if res.StatusCode != 200 {
 		if res.StatusCode == 429 {
 			fmt.Println(errors.New("request failed: too many requests"))
@@ -88,19 +88,19 @@ func CheckCity(city string) bool {
 		fmt.Println(errors.New("request failed: status code is not 200"))
 		return false
 	}
-	
+
 	body, err := io.ReadAll(res.Body)
 	if err != nil {
 		fmt.Println(err.Error())
 		return false
 	}
-	
+
 	var cityPopulationResponse CityPopulationResponse
 	err = json.Unmarshal(body, &cityPopulationResponse)
 	if err != nil {
 		fmt.Println(err.Error())
 		return false
 	}
-	
+
 	return !cityPopulationResponse.Error
 }

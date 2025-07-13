@@ -1,6 +1,7 @@
 package geo_test
 
 import (
+	"errors"
 	"testing"
 	
 	"demo/weather/geo"
@@ -20,5 +21,14 @@ func TestGetMyLocation(t *testing.T) {
 	if got.City != expected.City {
 		t.Errorf("ожидалось %v, получили %v", expected, got)
 	}
+}
+
+func TestGetMyLocationNoCity(t *testing.T) {
+	city := "WrongCity"
 	
+	_, err := geo.GetMyLocation(city)
+	
+	if !errors.Is(err, geo.NonExistedCityError) {
+		t.Errorf("ожидалось %v, получили %v", geo.NonExistedCityError, err)
+	}
 }

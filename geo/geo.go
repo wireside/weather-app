@@ -18,11 +18,18 @@ type CityPopulationResponse struct {
 	Error bool `json:"error"`
 }
 
+var (
+	Not200Error          = errors.New("request failed: status code is not 200")
+	CityNotFoundError    = errors.New("request failed: city data not found")
+	TooManyRequestsError = errors.New("request failed: too many requests")
+	NonExistedCityError  = errors.New("city does not exist")
+)
+
 func GetMyLocation(city string) (*GeoData, error) {
 	if city != "" {
 		isCity := CheckCity(city)
 		if !isCity {
-			return nil, errors.New(fmt.Sprintf("city %s doesn't exist", city))
+			return nil, NonExistedCityError
 		}
 
 		return &GeoData{
@@ -39,9 +46,9 @@ func GetMyLocation(city string) (*GeoData, error) {
 
 	if res.StatusCode != 200 {
 		if res.StatusCode == 429 {
-			return nil, errors.New("request failed: too many requests")
+			return nil, TooManyRequestsError
 		}
-		return nil, errors.New("request failed: status code is not 200")
+		return nil, Not200Error
 	}
 
 	body, err := io.ReadAll(res.Body)
@@ -78,14 +85,14 @@ func CheckCity(city string) bool {
 
 	if res.StatusCode != 200 {
 		if res.StatusCode == 429 {
-			fmt.Println(errors.New("request failed: too many requests"))
+			fmt.Println(TooManyRequestsError.Error())
 			return false
 		}
 		if res.StatusCode == 404 {
-			fmt.Println(errors.New("request failed: city data not found"))
+			fmt.Println(CityNotFoundError.Error())
 			return false
 		}
-		fmt.Println(errors.New("request failed: status code is not 200"))
+		fmt.Println(Not200Error.Error())
 		return false
 	}
 

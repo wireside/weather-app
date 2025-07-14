@@ -19,7 +19,7 @@ func TestGetMyLocation(t *testing.T) {
 		t.Error(err)
 	}
 	if got.City != expected.City {
-		t.Errorf("ожидалось %v, получили %v", expected, got)
+		t.Errorf("expected %v, got %v", expected, got)
 	}
 }
 
@@ -29,6 +29,6 @@ func TestGetMyLocationNoCity(t *testing.T) {
 	_, err := geo.GetMyLocation(city)
 	
 	if !errors.Is(err, geo.NonExistedCityError) {
-		t.Errorf("ожидалось %v, получили %v", geo.NonExistedCityError, err)
+		t.Errorf("expected %v, got %v", geo.NonExistedCityError, err)
 	}
 }

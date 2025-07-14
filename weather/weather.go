@@ -10,11 +10,19 @@ import (
 	"demo/weather/geo"
 )
 
-func GetWeather(geoData geo.GeoData, format int) string {
+var (
+	Not200Error      = errors.New("request failed: status code is not 200")
+	WrongFormatError = errors.New("wrong weather format")
+)
+
+func GetWeather(geoData geo.GeoData, format int) (string, error) {
+	if format < 1 || format > 4 {
+		return "", WrongFormatError
+	}
+
 	baseUrl, err := url.Parse("https://wttr.in/" + geoData.City)
 	if err != nil {
-		fmt.Println(err.Error())
-		return ""
+		return "", err
 	}
 
 	params := url.Values{}
@@ -23,22 +31,19 @@ func GetWeather(geoData geo.GeoData, format int) string {
 
 	res, err := http.Get(baseUrl.String())
 	if err != nil {
-		fmt.Println(err.Error())
-		return ""
+		return "", err
 	}
 
 	defer res.Body.Close()
 
 	if res.StatusCode != 200 {
-		fmt.Println(errors.New("request failed: status code is not 200"))
-		return ""
+		return "", Not200Error
 	}
 
 	body, err := io.ReadAll(res.Body)
 	if err != nil {
-		fmt.Println(err.Error())
-		return ""
+		return "", err
 	}
 
-	return string(body)
+	return string(body), nil
 }
